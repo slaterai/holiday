@@ -27,7 +27,7 @@ const nav: NavSection[] = [
     group: "Inbox",
     accent: "#ef4444",
     items: [
-      { label: "Email Triage", id: "email-triage" },
+      { label: "Email", id: "email-triage" },
       { label: "DMs", id: "dms" },
     ],
   },
