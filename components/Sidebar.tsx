@@ -66,7 +66,7 @@ export default function Sidebar({ activePage, onNavigate }: SidebarProps) {
       {/* Logo */}
       <div className="px-5 py-6 border-b border-white/[0.06]">
         <span className="text-white text-lg font-semibold tracking-[0.15em] uppercase">
-          AURA
+          Holiday
         </span>
       </div>
 
