@@ -126,7 +126,7 @@ export default function EmailPage() {
   return (
     <div className="flex h-full">
       {/* Email list */}
-      <div className="w-80 shrink-0 border-r border-white/[0.06] overflow-y-auto">
+      <div className="w-80 shrink-0 border-r border-white/[0.06] overflow-y-auto min-h-0">
         <div className="px-4 py-4 border-b border-white/[0.06]">
           <h2 className="text-white font-medium text-sm">Inbox</h2>
           <p className="text-white/30 text-xs mt-0.5">
