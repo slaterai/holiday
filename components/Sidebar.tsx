@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useUser, useClerk } from "@clerk/nextjs";
 
 type NavItem = {
   label: string;
@@ -58,6 +59,13 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activePage, onNavigate }: SidebarProps) {
+  const { user } = useUser();
+  const { signOut } = useClerk();
+
+  const displayName = user?.fullName || user?.firstName || "You";
+  const email = user?.primaryEmailAddress?.emailAddress || "";
+  const initials = displayName.charAt(0).toUpperCase();
+
   return (
     <aside
       className="flex flex-col w-56 shrink-0 h-full border-r border-white/[0.06]"
@@ -119,15 +127,21 @@ export default function Sidebar({ activePage, onNavigate }: SidebarProps) {
 
       {/* User */}
       <div className="px-4 py-4 border-t border-white/[0.06]">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-xs text-white/60 font-medium">
-            N
+        <div className="flex items-center gap-2.5 mb-2.5">
+          <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-xs text-white/60 font-medium shrink-0">
+            {initials}
           </div>
-          <div>
-            <p className="text-xs text-white font-medium leading-none mb-0.5">Nick Slater</p>
-            <p className="text-[10px] text-white/30 leading-none">create@nickslater.au</p>
+          <div className="min-w-0">
+            <p className="text-xs text-white font-medium leading-none mb-0.5 truncate">{displayName}</p>
+            <p className="text-[10px] text-white/30 leading-none truncate">{email}</p>
           </div>
         </div>
+        <button
+          onClick={() => signOut({ redirectUrl: "/sign-in" })}
+          className="w-full text-left text-[10px] text-white/20 hover:text-white/50 transition-colors"
+        >
+          Sign out
+        </button>
       </div>
     </aside>
   );
