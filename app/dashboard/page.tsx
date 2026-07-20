@@ -12,16 +12,7 @@ import PlaceholderPage from "@/components/PlaceholderPage";
 function DashboardInner() {
   const [activePage, setActivePage] = useState("home");
   const [pageTitle, setPageTitle] = useState("Home");
-  const [gmailConnected, setGmailConnected] = useState(false);
-  const [gmailEmail, setGmailEmail] = useState("");
   const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const status = searchParams.get("gmail");
-    if (status === "connected") {
-      setGmailConnected(true);
-    }
-  }, [searchParams]);
 
   function handleNavigate(id: string, label: string) {
     setActivePage(id);
@@ -31,7 +22,7 @@ function DashboardInner() {
   function renderPage() {
     switch (activePage) {
       case "email-triage":
-        return <EmailPage gmailConnected={gmailConnected} gmailEmail={gmailEmail} />;
+        return <EmailPage />;
       case "home":
         return <HomeScreen />;
       default:
