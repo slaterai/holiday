@@ -60,7 +60,11 @@ export default function EmailPage() {
             return new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime();
           });
           setEmails(sorted);
-          if (sorted.length > 0) setSelected(sorted[0].id);
+          if (sorted.length === 0 && emails.length === 0) {
+            setSelected(null);
+          } else if (sorted.length > 0 && !selected) {
+            setSelected(sorted[0].id);
+          }
         }
       } catch (err: any) {
         setError(err.message);
@@ -68,8 +72,11 @@ export default function EmailPage() {
         setLoading(false);
       }
     }
+
     fetchEmails();
-  }, []);
+    const interval = setInterval(fetchEmails, 30000);
+    return () => clearInterval(interval);
+  }, [emails.length, selected]);
 
   function copyReply(id: string, text: string) {
     navigator.clipboard.writeText(text);
