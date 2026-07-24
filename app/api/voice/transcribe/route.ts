@@ -35,15 +35,15 @@ export async function POST(req: NextRequest) {
                 media_type: "audio/webm",
                 data: base64Audio,
               },
-            } as any,
+            },
             {
               type: "text",
               text: "Transcribe this audio message. Return only the transcribed text, nothing else.",
             },
-          ],
+          ] as any,
         },
       ],
-    });
+    } as any);
 
     const text = response.content[0].type === "text" ? response.content[0].text : "";
 
