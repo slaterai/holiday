@@ -14,7 +14,7 @@ async function classifyAndProcess(transcript: string) {
         role: "user",
         content: `You are an AI assistant for Nick Slater, a luxury travel and lifestyle content creator.
 
-Analyze this voice memo and classify it. Then expand it into a polished concept or interpretation.
+Analyze this voice memo and classify it. Extract key actionable points.
 
 Voice memo: "${transcript}"
 
@@ -22,7 +22,7 @@ Respond with ONLY valid JSON (no markdown, no explanation):
 {
   "classification": one of: content_concept, email_draft, brand_inquiry, idea, note,
   "summary": "One sentence summary",
-  "interpretation": "Expanded/polished version (2-3 sentences) that turns this into actionable insight",
+  "interpretation": "• Bullet point 1\n• Bullet point 2\n• Bullet point 3",
   "tags": ["tag1", "tag2"]
 }`,
       },

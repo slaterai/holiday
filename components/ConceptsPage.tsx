@@ -86,33 +86,35 @@ export default function ConceptsPage() {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="border-b border-white/[0.06] p-6">
-        <h1 className="text-white font-medium mb-4">Concepts</h1>
-        <p className="text-white/40 text-sm mb-4">
-          {concepts.length} concept{concepts.length !== 1 ? "s" : ""}
-        </p>
+      <div className="border-b border-white/[0.06] px-6 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-white font-medium">Concepts</h1>
+          <p className="text-white/40 text-xs">
+            {concepts.length}
+          </p>
+        </div>
 
-        {/* Tag filter */}
+        {/* Compact tag filter */}
         {allTags.length > 0 && (
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-1.5 flex-wrap">
             <button
               onClick={() => setSelectedTag(null)}
-              className={`text-xs px-2.5 py-1 rounded transition-colors ${
+              className={`text-[11px] px-2 py-1 rounded transition-colors ${
                 selectedTag === null
                   ? "bg-white/20 text-white"
-                  : "bg-white/10 text-white/60 hover:text-white/80"
+                  : "bg-white/10 text-white/50 hover:text-white/70"
               }`}
             >
               All
             </button>
-            {allTags.map((tag) => (
+            {allTags.slice(0, 6).map((tag) => (
               <button
                 key={tag}
                 onClick={() => setSelectedTag(tag)}
-                className={`text-xs px-2.5 py-1 rounded transition-colors ${
+                className={`text-[11px] px-2 py-1 rounded transition-colors ${
                   selectedTag === tag
                     ? "bg-white/20 text-white"
-                    : "bg-white/10 text-white/60 hover:text-white/80"
+                    : "bg-white/10 text-white/50 hover:text-white/70"
                 }`}
               >
                 {tag}
@@ -124,22 +126,19 @@ export default function ConceptsPage() {
 
       {/* Concepts list */}
       <div className="flex-1 overflow-y-auto">
-        <div className="p-6">
+        <div className="p-4">
           {filtered.length === 0 ? (
             <p className="text-white/20 text-sm">No concepts yet</p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {filtered.map((concept) => (
                 <div
                   key={concept.id}
-                  className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-5"
+                  className="bg-white/[0.02] border border-white/[0.06] rounded p-4"
                 >
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <h3 className="text-white font-medium text-sm flex-1 leading-snug">
-                      {concept.title}
-                    </h3>
+                  <div className="flex items-start gap-2 mb-2">
                     <span
-                      className="text-[9px] font-semibold tracking-wider uppercase px-2 py-1 rounded shrink-0"
+                      className="text-[8px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded shrink-0 mt-0.5"
                       style={{
                         color: classificationColors[concept.classification],
                         background: `${classificationColors[concept.classification]}18`,
@@ -147,32 +146,22 @@ export default function ConceptsPage() {
                     >
                       {concept.classification.replace(/_/g, " ")}
                     </span>
+                    <h3 className="text-white font-medium text-sm leading-snug flex-1">
+                      {concept.title}
+                    </h3>
                   </div>
 
-                  <p className="text-white/60 text-sm leading-relaxed mb-3">
+                  <div className="text-white/60 text-xs leading-relaxed whitespace-pre-line mb-2">
                     {concept.description}
-                  </p>
-
-                  {concept.tags.length > 0 && (
-                    <div className="flex gap-1.5 mb-3">
-                      {concept.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-[10px] px-2 py-1 bg-white/10 rounded text-white/70"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-white/30">
+                    <span className="text-[9px] text-white/25">
                       {new Date(concept.createdAt).toLocaleDateString()}
                     </span>
                     <button
                       onClick={() => copyToClipboard(concept.description)}
-                      className="text-xs text-white/40 hover:text-white/70 transition-colors"
+                      className="text-[11px] text-white/40 hover:text-white/60 transition-colors"
                     >
                       Copy
                     </button>
