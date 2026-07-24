@@ -16,8 +16,6 @@ export default function VoiceRecorder({ onProcessed }: VoiceRecorderProps) {
   const [duration, setDuration] = useState(0);
   const [transcribing, setTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -31,83 +29,86 @@ export default function VoiceRecorder({ onProcessed }: VoiceRecorderProps) {
   async function startRecording() {
     try {
       setError(null);
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
-      chunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunksRef.current.push(e.data);
-        }
-      };
-
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
-        await transcribeAudio(audioBlob);
-        stream.getTracks().forEach((track) => track.stop());
-      };
-
-      mediaRecorder.start();
-      mediaRecorderRef.current = mediaRecorder;
       setIsRecording(true);
       setDuration(0);
 
       durationIntervalRef.current = setInterval(() => {
         setDuration((d) => d + 1);
       }, 1000);
+
+      await startBrowserRecognition();
     } catch (err: any) {
-      setError(err.message || "Failed to access microphone");
+      setError(err.message || "Failed to start recording");
+      setIsRecording(false);
     }
   }
 
   function stopRecording() {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      if (durationIntervalRef.current) {
-        clearInterval(durationIntervalRef.current);
-      }
+    setIsRecording(false);
+    if (durationIntervalRef.current) {
+      clearInterval(durationIntervalRef.current);
     }
   }
 
-  async function transcribeAudio(audioBlob: Blob) {
+  async function startBrowserRecognition() {
     setTranscribing(true);
     setError(null);
 
     try {
-      // First, transcribe
-      const formData = new FormData();
-      formData.append("audio", audioBlob);
-
-      const transcribeRes = await fetch("/api/voice/transcribe", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!transcribeRes.ok) {
-        const data = await transcribeRes.json();
-        throw new Error(data.error || "Transcription failed");
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        throw new Error("Speech recognition not supported on this browser");
       }
 
-      const transcribeData = await transcribeRes.json();
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.language = "en-US";
 
-      // Then, process and auto-save
-      const processRes = await fetch("/api/voice/process", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transcript: transcribeData.text }),
-      });
+      let transcript = "";
 
-      if (!processRes.ok) {
-        const data = await processRes.json();
-        throw new Error(data.error || "Processing failed");
-      }
+      recognition.onresult = (event: any) => {
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+      };
 
-      const processData = await processRes.json();
-      onProcessed(processData);
+      recognition.onerror = (event: any) => {
+        throw new Error(event.error || "Speech recognition failed");
+      };
+
+      recognition.onend = async () => {
+        if (!transcript.trim()) {
+          setError("No speech detected. Try again.");
+          setTranscribing(false);
+          return;
+        }
+
+        // Process the transcript
+        try {
+          const processRes = await fetch("/api/voice/process", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ transcript }),
+          });
+
+          if (!processRes.ok) {
+            const data = await processRes.json();
+            throw new Error(data.error || "Processing failed");
+          }
+
+          const processData = await processRes.json();
+          onProcessed(processData);
+        } catch (err: any) {
+          setError(err.message);
+        } finally {
+          setTranscribing(false);
+        }
+      };
+
+      recognition.start();
     } catch (err: any) {
       setError(err.message);
-    } finally {
       setTranscribing(false);
     }
   }
