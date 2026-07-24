@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { useUser } from "@clerk/nextjs";
 
 interface ReplyEditorProps {
@@ -50,8 +50,10 @@ export default function ReplyEditor({
         throw new Error(data.error || "Failed to send email");
       }
 
+      const sb = getSupabase();
+
       // Store the sent reply for voice learning
-      await supabase.from("sent_replies").insert({
+      await sb.from("sent_replies").insert({
         user_id: user.id,
         email_id: emailId,
         to_email: toEmail,
@@ -62,7 +64,7 @@ export default function ReplyEditor({
       // Store deal data if provided
       if (rate || usagePeriod) {
         const emailDomain = toEmail.split("@")[1];
-        await supabase.from("deals").insert({
+        await sb.from("deals").insert({
           user_id: user.id,
           brand: emailDomain.replace(".", " ").toUpperCase(),
           contact_email: toEmail,
