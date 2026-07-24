@@ -8,6 +8,7 @@ import Topbar from "@/components/Topbar";
 import HomeScreen from "@/components/HomeScreen";
 import EmailPage from "@/components/EmailPage";
 import VoicePage from "@/components/VoicePage";
+import ConceptsPage from "@/components/ConceptsPage";
 import PlaceholderPage from "@/components/PlaceholderPage";
 
 function DashboardInner() {
@@ -26,6 +27,8 @@ function DashboardInner() {
         return <EmailPage />;
       case "voice":
         return <VoicePage />;
+      case "concepts":
+        return <ConceptsPage />;
       case "home":
         return <HomeScreen />;
       default:

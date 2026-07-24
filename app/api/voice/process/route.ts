@@ -56,7 +56,8 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    const { data, error } = await supabase
+    // Save to voice_messages
+    const { data: voiceData, error: voiceError } = await supabase
       .from("voice_messages")
       .insert({
         user_id: userId,
@@ -68,11 +69,27 @@ export async function POST(req: NextRequest) {
       } as any)
       .select();
 
-    if (error) throw error;
+    if (voiceError) throw voiceError;
+
+    // Also save to concepts
+    const { data: conceptData, error: conceptError } = await supabase
+      .from("concepts")
+      .insert({
+        user_id: userId,
+        title: processed.summary,
+        description: processed.interpretation,
+        classification: processed.classification,
+        tags: processed.tags,
+        source: "voice",
+      } as any)
+      .select();
+
+    if (conceptError) throw conceptError;
 
     return NextResponse.json({
       success: true,
-      id: (data as any)?.[0]?.id,
+      id: (voiceData as any)?.[0]?.id,
+      conceptId: (conceptData as any)?.[0]?.id,
       classification: processed.classification,
       summary: processed.summary,
       interpretation: processed.interpretation,
