@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import ReplyEditor from "./ReplyEditor";
 
 type Email = {
   id: string;
@@ -43,6 +44,7 @@ export default function EmailPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchEmails() {
@@ -197,10 +199,10 @@ export default function EmailPage() {
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-[10px] font-semibold tracking-wider uppercase text-white/30">Draft reply</p>
                   <button
-                    onClick={() => copyReply(selectedEmail.id, selectedEmail.suggestedReply!)}
-                    className="text-[10px] font-medium text-white/40 hover:text-white/70 transition-colors"
+                    onClick={() => setEditingReplyId(selectedEmail.id)}
+                    className="text-[10px] font-medium text-white text-center px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded transition-colors"
                   >
-                    {copiedId === selectedEmail.id ? "Copied" : "Copy"}
+                    Edit & Send
                   </button>
                 </div>
                 <p className="text-white/60 text-sm leading-relaxed">{selectedEmail.suggestedReply}</p>
@@ -213,6 +215,21 @@ export default function EmailPage() {
           </div>
         )}
       </div>
+
+      {/* Reply editor modal */}
+      {editingReplyId && selectedEmail && (
+        <ReplyEditor
+          emailId={editingReplyId}
+          toEmail={selectedEmail.from}
+          subject={selectedEmail.subject}
+          suggestedReply={selectedEmail.suggestedReply || ""}
+          onSent={() => {
+            setEditingReplyId(null);
+            // Optionally reload emails or show a success toast
+          }}
+          onCancel={() => setEditingReplyId(null)}
+        />
+      )}
     </div>
   );
 }
