@@ -23,6 +23,12 @@ export default function ReplyEditor({
 }: ReplyEditorProps) {
   const { user } = useUser();
   const [reply, setReply] = useState(suggestedReply);
+  const [signature, setSignature] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("email_signature") || "";
+    }
+    return "";
+  });
   const [rate, setRate] = useState("");
   const [usagePeriod, setUsagePeriod] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,6 +40,14 @@ export default function ReplyEditor({
     setError(null);
 
     try {
+      // Persist signature to localStorage
+      if (signature) {
+        localStorage.setItem("email_signature", signature);
+      }
+
+      // Combine reply with signature
+      const fullReply = signature ? `${reply}\n\n${signature}` : reply;
+
       // Send the email via Gmail API
       const sendRes = await fetch("/api/emails/send", {
         method: "POST",
@@ -41,7 +55,7 @@ export default function ReplyEditor({
         body: JSON.stringify({
           toEmail,
           subject,
-          replyText: reply,
+          replyText: fullReply,
         }),
       });
 
@@ -130,6 +144,19 @@ export default function ReplyEditor({
                 className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-white/[0.2]"
               />
             </div>
+          </div>
+
+          {/* Signature field */}
+          <div className="pt-2 border-t border-white/[0.08]">
+            <label className="text-xs font-semibold text-white/50 uppercase mb-2 block">
+              Signature
+            </label>
+            <textarea
+              value={signature}
+              onChange={(e) => setSignature(e.target.value)}
+              className="w-full h-20 bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-white text-sm resize-none focus:outline-none focus:border-white/[0.2]"
+              placeholder="Your email signature (auto-appended to all replies)"
+            />
           </div>
 
           {error && (
