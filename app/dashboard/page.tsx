@@ -7,6 +7,7 @@ import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 import HomeScreen from "@/components/HomeScreen";
 import EmailPage from "@/components/EmailPage";
+import VoicePage from "@/components/VoicePage";
 import PlaceholderPage from "@/components/PlaceholderPage";
 
 function DashboardInner() {
@@ -23,6 +24,8 @@ function DashboardInner() {
     switch (activePage) {
       case "email-triage":
         return <EmailPage />;
+      case "voice":
+        return <VoicePage />;
       case "home":
         return <HomeScreen />;
       default:

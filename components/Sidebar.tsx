@@ -35,7 +35,7 @@ const nav: NavSection[] = [
     group: "Create",
     accent: "#22c55e",
     items: [
-      { label: "Voice to Script", id: "voice-to-script" },
+      { label: "Voice", id: "voice" },
       { label: "Concepts", id: "concepts" },
       { label: "Content Calendar", id: "content-calendar" },
     ],
