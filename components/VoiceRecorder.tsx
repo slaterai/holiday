@@ -3,10 +3,15 @@
 import { useState, useRef, useEffect } from "react";
 
 interface VoiceRecorderProps {
-  onTranscription: (text: string) => void;
+  onProcessed: (result: {
+    classification: string;
+    summary: string;
+    interpretation: string;
+    tags: string[];
+  }) => void;
 }
 
-export default function VoiceRecorder({ onTranscription }: VoiceRecorderProps) {
+export default function VoiceRecorder({ onProcessed }: VoiceRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
   const [transcribing, setTranscribing] = useState(false);
@@ -70,21 +75,36 @@ export default function VoiceRecorder({ onTranscription }: VoiceRecorderProps) {
     setError(null);
 
     try {
+      // First, transcribe
       const formData = new FormData();
       formData.append("audio", audioBlob);
 
-      const res = await fetch("/api/voice/transcribe", {
+      const transcribeRes = await fetch("/api/voice/transcribe", {
         method: "POST",
         body: formData,
       });
 
-      if (!res.ok) {
-        const data = await res.json();
+      if (!transcribeRes.ok) {
+        const data = await transcribeRes.json();
         throw new Error(data.error || "Transcription failed");
       }
 
-      const data = await res.json();
-      onTranscription(data.text);
+      const transcribeData = await transcribeRes.json();
+
+      // Then, process and auto-save
+      const processRes = await fetch("/api/voice/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript: transcribeData.text }),
+      });
+
+      if (!processRes.ok) {
+        const data = await processRes.json();
+        throw new Error(data.error || "Processing failed");
+      }
+
+      const processData = await processRes.json();
+      onProcessed(processData);
     } catch (err: any) {
       setError(err.message);
     } finally {
