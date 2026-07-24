@@ -55,8 +55,12 @@ export default function EmailPage() {
           setConnected(false);
         } else {
           setConnected(true);
-          setEmails(data.emails || []);
-          if (data.emails?.length > 0) setSelected(data.emails[0].id);
+          const sorted = (data.emails || []).sort((a: Email, b: Email) => {
+            if (a.urgency !== b.urgency) return b.urgency - a.urgency;
+            return new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime();
+          });
+          setEmails(sorted);
+          if (sorted.length > 0) setSelected(sorted[0].id);
         }
       } catch (err: any) {
         setError(err.message);

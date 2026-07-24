@@ -2,6 +2,7 @@ import { google } from "googleapis";
 import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -37,17 +38,23 @@ function decodeBody(payload: any): string {
   return "";
 }
 
-async function classifyEmail(subject: string, body: string, fromName: string) {
-  const prompt = `You are an assistant for Nick Slater, a luxury travel and lifestyle content creator with 500K followers who earns ~$20k/month from brand partnerships.
+async function classifyEmail(subject: string, body: string, fromName: string, voiceContext?: string) {
+  let systemPrompt = `You are an assistant for Nick Slater, a luxury travel and lifestyle content creator with 500K followers who earns ~$20k/month from brand partnerships.
 
-Classify this email and extract key information. Reply with JSON only, no explanation.
+Classify this email and extract key information. Reply with JSON only, no explanation.`;
 
-Email:
-From: ${fromName}
-Subject: ${subject}
-Body: ${body.slice(0, 1500)}
+  if (voiceContext) {
+    systemPrompt += `
 
-Reply with this exact JSON structure:
+Nick's voice (learned from past replies):
+${voiceContext}
+
+Use this context to match his natural tone, phrasing style, and decision-making patterns in the suggested reply.`;
+  }
+
+  systemPrompt += `
+
+Respond with this exact JSON structure:
 {
   "classification": one of: brand_inquiry, contract, invoice, usage_rights, follow_up_needed, action_required, noise,
   "urgency": number 1-5 (5 = urgent),
@@ -59,13 +66,47 @@ Reply with this exact JSON structure:
   const response = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 800,
-    messages: [{ role: "user", content: prompt }],
+    system: systemPrompt,
+    messages: [
+      {
+        role: "user",
+        content: `Email:
+From: ${fromName}
+Subject: ${subject}
+Body: ${body.slice(0, 1500)}`,
+      },
+    ],
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error("No JSON in Claude response");
   return JSON.parse(jsonMatch[0]);
+}
+
+async function buildVoiceContext(userId: string): Promise<string> {
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    // Fetch latest 10 sent replies
+    const { data: replies } = await supabase
+      .from("sent_replies")
+      .select("reply_text")
+      .eq("user_id", userId)
+      .order("sent_at", { ascending: false })
+      .limit(10);
+
+    if (!replies || replies.length === 0) return "";
+
+    // Build a concise summary of past replies
+    const samples = replies.slice(0, 5).map((r: any) => `- "${r.reply_text}"`).join("\n");
+    return `Recent reply examples:\n${samples}`;
+  } catch (err) {
+    return "";
+  }
 }
 
 export async function GET(req: NextRequest) {
@@ -81,6 +122,9 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    // Build voice context from past replies
+    const voiceContext = await buildVoiceContext(userId);
+
     const oauth2Client = getOAuthClient(accessToken, refreshToken);
     const gmail = google.gmail({ version: "v1", auth: oauth2Client });
 
@@ -112,8 +156,8 @@ export async function GET(req: NextRequest) {
 
         const body = decodeBody(full.data.payload);
 
-        // Classify with Claude
-        const classification = await classifyEmail(subject, body, fromName);
+        // Classify with Claude, passing voice context
+        const classification = await classifyEmail(subject, body, fromName, voiceContext);
 
         return {
           id: msg.id,

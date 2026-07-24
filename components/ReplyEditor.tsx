@@ -59,7 +59,7 @@ export default function ReplyEditor({
         to_email: toEmail,
         subject: `Re: ${subject}`,
         reply_text: reply,
-      });
+      } as any);
 
       // Store deal data if provided
       if (rate || usagePeriod) {
@@ -70,7 +70,7 @@ export default function ReplyEditor({
           contact_email: toEmail,
           rate: rate ? parseFloat(rate) : null,
           usage_period: usagePeriod || null,
-        });
+        } as any);
       }
 
       onSent();
