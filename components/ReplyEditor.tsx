@@ -34,6 +34,22 @@ export default function ReplyEditor({
     setError(null);
 
     try {
+      // Send the email via Gmail API
+      const sendRes = await fetch("/api/emails/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toEmail,
+          subject,
+          replyText: reply,
+        }),
+      });
+
+      if (!sendRes.ok) {
+        const data = await sendRes.json();
+        throw new Error(data.error || "Failed to send email");
+      }
+
       // Store the sent reply for voice learning
       await supabase.from("sent_replies").insert({
         user_id: user.id,
