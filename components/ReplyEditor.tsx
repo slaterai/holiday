@@ -97,29 +97,30 @@ export default function ReplyEditor({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#0a0a0a] rounded-lg border border-white/[0.08] max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+      <div className="bg-[#0a0a0a] rounded-lg border border-white/[0.08] max-w-2xl w-full max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="px-6 py-4 border-b border-white/[0.08]">
           <h2 className="text-white font-medium">Draft reply</h2>
           <p className="text-white/30 text-xs mt-1">To: {toEmail}</p>
         </div>
 
-        {/* Reply text editor */}
-        <div className="px-6 py-4 space-y-4">
-          <div>
-            <label className="text-xs font-semibold text-white/50 uppercase mb-2 block">
+        {/* Main content - scrollable */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          {/* Reply text editor */}
+          <div className="mb-5">
+            <label className="text-xs font-semibold text-white/50 uppercase mb-3 block">
               Reply
             </label>
             <textarea
               value={reply}
               onChange={(e) => setReply(e.target.value)}
-              className="w-full h-48 bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-white text-sm resize-none focus:outline-none focus:border-white/[0.2]"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-4 py-3 text-white text-sm leading-relaxed resize-none focus:outline-none focus:border-white/[0.2] min-h-[240px]"
               placeholder="Edit your reply here..."
             />
           </div>
 
           {/* Quote data fields */}
-          <div className="grid grid-cols-2 gap-4 pt-2 border-t border-white/[0.08]">
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/[0.08]">
             <div>
               <label className="text-xs font-semibold text-white/50 uppercase mb-2 block">
                 Rate (optional)

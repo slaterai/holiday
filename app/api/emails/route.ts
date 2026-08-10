@@ -43,13 +43,26 @@ async function classifyEmail(subject: string, body: string, fromName: string, vo
 
 Classify this email and extract key information. Reply with JSON only, no explanation.
 
-For collaboration/brand enquiries, use this framework:
-- Start with "Hi [Name], thanks for reaching out"
-- Express genuine interest (1 sentence max)
-- Ask only 2-3 specific follow-up questions about THEIR proposal—be concise and direct, never rambling
-- End with "Once I have those details, I'll send over my rates. Looking forward to it."
-- Tone: warm, conversational, professional, confident, DIRECT
-- Format: 2-3 sentences max. Prose paragraph. Mobile-friendly. No fluff.`;
+For collaboration/brand enquiries, use this EXACT format:
+
+Hi [Name],
+
+Hope you're well and thanks for reaching out.
+
+I would love to discuss this collaboration further.
+So that I can give you a tailored and accurate quote, can you provide the following details?
+
+* [Key detail 1 from their email - specific, not generic]
+* [Key detail 2 from their email - specific, not generic]
+* [Key detail 3 from their email - specific, not generic]
+* [Key detail 4 if needed]
+
+Once I have those, I'll send something over straight away.
+
+Thanks,
+Nick
+
+Match this format EXACTLY. Bullet points must be specific to what they mentioned (usage rights, platforms, exclusivity, budget, timeline, etc.) - NOT generic placeholders.`;
 
   if (voiceContext) {
     systemPrompt += `
@@ -68,7 +81,7 @@ Respond with this exact JSON structure:
   "urgency": number 1-5 (5 = urgent),
   "summary": "2-3 sentence plain English summary of what this email is actually about",
   "suggestedAction": "One sentence on what Nick should do next",
-  "suggestedReply": "A draft reply in Nick's voice if a reply is needed, otherwise null. For brand enquiries: Start 'Hi [Name], thanks for reaching out' (max 2-3 sentences total). Express genuine interest. Ask ONLY 2-3 specific follow-up questions about their proposal—be terse, not rambling. End 'Once I have those details, I'll send over my rates. Looking forward to it.' Keep it SHORT and punchy—mobile-friendly, no fluff."
+  "suggestedReply": "A draft reply if needed, else null. For brand enquiries ONLY, format EXACTLY as:\\nHi [Name],\\n\\nHope you're well and thanks for reaching out.\\n\\nI would love to discuss this collaboration further.\\nSo that I can give you a tailored and accurate quote, can you provide the following details?\\n\\n* [specific detail from their email]\\n* [specific detail from their email]\\n* [specific detail from their email]\\n\\nOnce I have those, I'll send something over straight away.\\n\\nThanks,\\nNick\\n\\nBullet points MUST be specific to what they mentioned (usage rights details, platforms, exclusivity, budget ranges, timeline, etc). NEVER generic placeholders."
 }`;
 
   const response = await anthropic.messages.create({
