@@ -45,12 +45,11 @@ Classify this email and extract key information. Reply with JSON only, no explan
 
 For collaboration/brand enquiries, use this framework:
 - Start with "Hi [Name], thanks for reaching out"
-- Express genuine interest in the opportunity
-- Ask specific follow-up questions about THEIR proposal (usage rights details, platforms, exclusivity, etc.)
-- Show you understand what they're proposing
-- End with "Looking forward to it" or similar
-- Tone: warm, conversational, professional, confident
-- Format: Prose paragraph, NOT bullet points. Natural flow. Easy to read on mobile.`;
+- Express genuine interest (1 sentence max)
+- Ask only 2-3 specific follow-up questions about THEIR proposal—be concise and direct, never rambling
+- End with "Once I have those details, I'll send over my rates. Looking forward to it."
+- Tone: warm, conversational, professional, confident, DIRECT
+- Format: 2-3 sentences max. Prose paragraph. Mobile-friendly. No fluff.`;
 
   if (voiceContext) {
     systemPrompt += `
@@ -69,7 +68,7 @@ Respond with this exact JSON structure:
   "urgency": number 1-5 (5 = urgent),
   "summary": "2-3 sentence plain English summary of what this email is actually about",
   "suggestedAction": "One sentence on what Nick should do next",
-  "suggestedReply": "A draft reply in Nick's voice if a reply is needed, otherwise null. For brand enquiries: Start 'Hi [Name], thanks for reaching out'. Express interest. Ask specific follow-up questions about their proposal (usage rights details, platforms, exclusivity, budget). Show understanding. End 'Looking forward to it.' Format as one flowing paragraph, conversational and warm but direct."
+  "suggestedReply": "A draft reply in Nick's voice if a reply is needed, otherwise null. For brand enquiries: Start 'Hi [Name], thanks for reaching out' (max 2-3 sentences total). Express genuine interest. Ask ONLY 2-3 specific follow-up questions about their proposal—be terse, not rambling. End 'Once I have those details, I'll send over my rates. Looking forward to it.' Keep it SHORT and punchy—mobile-friendly, no fluff."
 }`;
 
   const response = await anthropic.messages.create({
