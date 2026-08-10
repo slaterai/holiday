@@ -43,7 +43,20 @@ async function classifyEmail(subject: string, body: string, fromName: string, vo
 
 Classify this email and extract key information. Reply with JSON only, no explanation.
 
-For collaboration/brand enquiries, use this EXACT format:
+For collaboration/brand enquiries, FIRST CHECK what they provided:
+- Usage rights/duration mentioned? (YES/NO)
+- Deliverables mentioned? (YES/NO)
+- Timeline mentioned? (YES/NO)
+- Budget mentioned? (YES/NO)
+
+IF ALL 4 PROVIDED: Generate CUSTOM RESPONSE with:
+- Acknowledge their specific proposal
+- Reference past relevant work
+- Share metrics (audience, engagement, growth)
+- Confirm deliverables + usage rights + pricing
+- Next step ("attached media kit" or "let me know if you'd like to proceed")
+
+IF ANY MISSING: Generate TEMPLATE asking ONLY for missing items:
 
 Hi [Name],
 
@@ -52,17 +65,13 @@ Hope you're well and thanks for reaching out.
 I would love to discuss this collaboration further.
 So that I can give you a tailored and accurate quote, can you provide the following details?
 
-* [Key detail 1 from their email - specific, not generic]
-* [Key detail 2 from their email - specific, not generic]
-* [Key detail 3 from their email - specific, not generic]
-* [Key detail 4 if needed]
+* [ONLY missing item 1]
+* [ONLY missing item 2]
 
 Once I have those, I'll send something over straight away.
 
 Thanks,
-Nick
-
-Match this format EXACTLY. Bullet points must be specific to what they mentioned (usage rights, platforms, exclusivity, budget, timeline, etc.) - NOT generic placeholders.`;
+Nick`;
 
   if (voiceContext) {
     systemPrompt += `
@@ -81,7 +90,7 @@ Respond with this exact JSON structure:
   "urgency": number 1-5 (5 = urgent),
   "summary": "2-3 sentence plain English summary of what this email is actually about",
   "suggestedAction": "One sentence on what Nick should do next",
-  "suggestedReply": "A draft reply if needed, else null. For brand enquiries ONLY, format EXACTLY as:\\nHi [Name],\\n\\nHope you're well and thanks for reaching out.\\n\\nI would love to discuss this collaboration further.\\nSo that I can give you a tailored and accurate quote, can you provide the following details?\\n\\n* [specific detail from their email]\\n* [specific detail from their email]\\n* [specific detail from their email]\\n\\nOnce I have those, I'll send something over straight away.\\n\\nThanks,\\nNick\\n\\nBullet points MUST be specific to what they mentioned (usage rights details, platforms, exclusivity, budget ranges, timeline, etc). NEVER generic placeholders."
+  "suggestedReply": "A draft reply if needed, else null. For brand enquiries: CHECK if they provided usage rights, deliverables, timeline, budget. IF ALL 4: Send custom response with past work reference + metrics + clear deliverables/rights/price + next step. IF ANY MISSING: Send template asking ONLY for missing items. Template: Hi [Name],\\n\\nHope you're well and thanks for reaching out.\\n\\nI would love to discuss this collaboration further.\\nSo that I can give you a tailored and accurate quote, can you provide the following details?\\n\\n* [Missing item 1 only]\\n* [Missing item 2 only]\\n\\nOnce I have those, I'll send something over straight away.\\n\\nThanks,\\nNick"
 }`;
 
   const response = await anthropic.messages.create({
