@@ -41,7 +41,14 @@ function decodeBody(payload: any): string {
 async function classifyEmail(subject: string, body: string, fromName: string, voiceContext?: string) {
   let systemPrompt = `You are an assistant for Nick Slater, a luxury travel and lifestyle content creator with 500K followers who earns ~$20k/month from brand partnerships.
 
-Classify this email and extract key information. Reply with JSON only, no explanation.`;
+Classify this email and extract key information. Reply with JSON only, no explanation.
+
+For collaboration/brand enquiries, use this framework:
+- Thank them for reaching out, express interest
+- Ask for key details: usage rights, deliverables, budget, timeline
+- Promise to send quote once details received
+- Keep it concise and scannable (use bullets)
+- Tone: warm, professional, confident, direct`;
 
   if (voiceContext) {
     systemPrompt += `
@@ -49,7 +56,7 @@ Classify this email and extract key information. Reply with JSON only, no explan
 Nick's voice (learned from past replies):
 ${voiceContext}
 
-Use this context to match his natural tone, phrasing style, and decision-making patterns in the suggested reply.`;
+Match his tone and phrasing in all replies.`;
   }
 
   systemPrompt += `
@@ -60,7 +67,7 @@ Respond with this exact JSON structure:
   "urgency": number 1-5 (5 = urgent),
   "summary": "2-3 sentence plain English summary of what this email is actually about",
   "suggestedAction": "One sentence on what Nick should do next",
-  "suggestedReply": "A draft reply in Nick's voice if a reply is needed, otherwise null. Nick's tone: direct, warm, professional. Never sycophantic. Gets to the point fast."
+  "suggestedReply": "A draft reply in Nick's voice if a reply is needed, otherwise null. Format: opening line, context sentence, bullet points for key info, closing statement. Scannable and concise."
 }`;
 
   const response = await anthropic.messages.create({
